@@ -1,27 +1,89 @@
-<script>
-  // Lấy URL gốc của trang hiện tại (vd: https://tennguoidung.github.io/meetingpdf/)
-  const base = window.location.origin + window.location.pathname.replace(/index\.html$/, '');
-  const dataUrl = base + 'meetings.json';
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phòng họp không giấy</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f2f6fa;
+      margin: 0;
+      padding: 20px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    h1 {
+      color: #0077cc;
+      margin-bottom: 5px;
+    }
+    .meeting {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 12px;
+      transition: transform 0.15s ease;
+    }
+    .meeting:hover {
+      transform: translateY(-3px);
+    }
+    a {
+      color: #0077cc;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    small {
+      color: #666;
+    }
+    footer {
+      text-align: center;
+      font-size: 13px;
+      color: #999;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📑 Phòng họp không giấy</h1>
+    <p>Xem nhanh nội dung các cuộc họp dưới dạng PDF</p>
+  </header>
 
-  fetch(dataUrl)
-    .then(response => {
-      if (!response.ok) throw new Error("Không thể tải file JSON");
-      return response.json();
-    })
-    .then(data => {
-      const list = document.getElementById('list');
-      data.forEach(m => {
-        const item = document.createElement('div');
-        item.className = 'meeting';
-        item.innerHTML = `
-          <a href="meeting.html?file=${encodeURIComponent(m.pdf)}">${m.title}</a><br>
-          <small>Ngày họp: ${m.date}</small>
-        `;
-        list.appendChild(item);
+  <div id="list">Đang tải danh sách cuộc họp...</div>
+
+  <footer>
+    © 2025 Phòng họp không giấy – Github Pages
+  </footer>
+
+  <script>
+    const dataUrl = window.location.origin + '/phonghopkhonggiay/meetings.json';
+
+    fetch(dataUrl)
+      .then((response) => {
+        if (!response.ok) throw new Error('Không thể tải file meetings.json');
+        return response.json();
+      })
+      .then((data) => {
+        const list = document.getElementById('list');
+        list.innerHTML = ''; // Xóa nội dung "Đang tải..."
+        data.forEach((m) => {
+          const item = document.createElement('div');
+          item.className = 'meeting';
+          item.innerHTML = `
+            <a href="meeting.html?file=${encodeURIComponent(m.pdf)}">${m.title}</a><br>
+            <small>📅 Ngày họp: ${m.date}</small>
+          `;
+          list.appendChild(item);
+        });
+      })
+      .catch((error) => {
+        document.getElementById('list').innerHTML =
+          '<p style="color:red;text-align:center;">⚠️ Không thể tải danh sách cuộc họp.</p>';
+        console.error(error);
       });
-    })
-    .catch(error => {
-      document.getElementById('list').innerHTML = '<p style="color:red;text-align:center;">⚠️ Không tải được danh sách cuộc họp.</p>';
-      console.error(error);
-    });
-</script>
+  </script>
+</body>
+</html>
