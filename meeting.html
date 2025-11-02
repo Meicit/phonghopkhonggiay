@@ -5,24 +5,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Xem nội dung cuộc họp</title>
   <style>
-    body { margin: 0; }
-    iframe { width: 100%; height: 100vh; border: none; }
-    a.back { display: inline-block; margin: 10px; color: #2b5cb8; text-decoration: none; font-weight: bold; }
+    body { margin: 0; background: #f2f6fa; }
+    header {
+      background: #0077cc;
+      color: white;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+    }
+    a.back {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    iframe {
+      width: 100%;
+      height: calc(100vh - 50px);
+      border: none;
+    }
   </style>
 </head>
 <body>
-  <a href="index.html" class="back">⬅ Quay lại</a>
+  <header>
+    <a href="index.html" class="back">⬅ Quay lại</a>
+    <h3>Nội dung cuộc họp</h3>
+  </header>
+
   <iframe id="pdfFrame"></iframe>
 
   <script>
     const params = new URLSearchParams(window.location.search);
     const file = params.get('file');
+    const pdfFrame = document.getElementById('pdfFrame');
+
     if (file) {
-      document.getElementById('pdfFrame').src = file;
+      // Đảm bảo đường dẫn đúng
+      const path = '/phonghopkhonggiay/' + file;
+      pdfFrame.src = path;
     } else {
-      document.body.innerHTML = '<p style="text-align:center">Không tìm thấy file PDF.</p>';
+      document.body.innerHTML = '<p style="text-align:center;margin-top:50px;">Không tìm thấy file PDF.</p>';
     }
   </script>
 </body>
 </html>
-
