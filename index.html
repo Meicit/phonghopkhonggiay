@@ -1,36 +1,27 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MeetingPDF - Danh sách cuộc họp</title>
-  <style>
-    body { font-family: sans-serif; background: #f5f7fa; margin: 0; padding: 20px; }
-    h1 { text-align: center; color: #2b5cb8; }
-    .meeting { background: white; padding: 15px; margin: 10px 0; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-    a { text-decoration: none; color: #2b5cb8; font-weight: bold; }
-  </style>
-</head>
-<body>
-  <h1>📅 Danh sách cuộc họp</h1>
-  <div id="list"></div>
+<script>
+  // Lấy URL gốc của trang hiện tại (vd: https://tennguoidung.github.io/meetingpdf/)
+  const base = window.location.origin + window.location.pathname.replace(/index\.html$/, '');
+  const dataUrl = base + 'meetings.json';
 
-  <script>
-    fetch('meetings.json')
-      .then(response => response.json())
-      .then(data => {
-        const list = document.getElementById('list');
-        data.forEach(m => {
-          const item = document.createElement('div');
-          item.className = 'meeting';
-          item.innerHTML = `
-            <a href="meeting.html?file=${encodeURIComponent(m.pdf)}">${m.title}</a><br>
-            <small>Ngày họp: ${m.date}</small>
-          `;
-          list.appendChild(item);
-        });
+  fetch(dataUrl)
+    .then(response => {
+      if (!response.ok) throw new Error("Không thể tải file JSON");
+      return response.json();
+    })
+    .then(data => {
+      const list = document.getElementById('list');
+      data.forEach(m => {
+        const item = document.createElement('div');
+        item.className = 'meeting';
+        item.innerHTML = `
+          <a href="meeting.html?file=${encodeURIComponent(m.pdf)}">${m.title}</a><br>
+          <small>Ngày họp: ${m.date}</small>
+        `;
+        list.appendChild(item);
       });
-  </script>
-</body>
-</html>
-
+    })
+    .catch(error => {
+      document.getElementById('list').innerHTML = '<p style="color:red;text-align:center;">⚠️ Không tải được danh sách cuộc họp.</p>';
+      console.error(error);
+    });
+</script>
