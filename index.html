@@ -4,6 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Phòng họp không giấy</title>
+
+  <!-- Thư viện pdf.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -15,60 +19,119 @@
     h1 {
       text-align: center;
       color: #0073e6;
+      margin-bottom: 10px;
     }
     .meeting-list {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       margin-top: 20px;
     }
     .meeting-item {
       background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      padding: 15px;
-      width: 300px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 15px 20px;
+      width: 90%;
+      max-width: 400px;
       text-align: center;
       cursor: pointer;
       transition: transform 0.2s;
     }
     .meeting-item:hover {
       transform: scale(1.03);
-      background-color: #eef6ff;
+      background-color: #eaf3ff;
     }
-    iframe {
+    #pdfContainer {
       display: none;
-      width: 100%;
-      height: 600px;
-      border: none;
       margin-top: 20px;
+      width: 100%;
+      text-align: center;
+    }
+    canvas {
+      max-width: 100%;
+      height: auto;
+    }
+    .back-btn {
+      display: none;
+      margin-top: 10px;
+      background: #0073e6;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
   <h1>📅 Danh sách cuộc họp</h1>
+
   <div id="meetingList" class="meeting-list"></div>
-  <iframe id="pdfViewer"></iframe>
+
+  <button id="backBtn" class="back-btn">⬅ Quay lại danh sách</button>
+
+  <div id="pdfContainer"></div>
 
   <script>
+    // Cấu hình PDF.js
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
+
+    const meetingList = document.getElementById('meetingList');
+    const pdfContainer = document.getElementById('pdfContainer');
+    const backBtn = document.getElementById('backBtn');
+
+    // Hiển thị PDF
+    async function showPDF(url) {
+      meetingList.style.display = 'none';
+      backBtn.style.display = 'block';
+      pdfContainer.style.display = 'block';
+      pdfContainer.innerHTML = ''; // xóa nội dung cũ
+
+      const loadingTask = pdfjsLib.getDocument(url);
+      const pdf = await loadingTask.promise;
+
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        const page = await pdf.getPage(pageNum);
+        const scale = Math.min(window.innerWidth / 800, 1.2); // tự co giãn theo chiều rộng màn hình
+        const viewport = page.getViewport({ scale });
+
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        pdfContainer.appendChild(canvas);
+
+        await page.render({ canvasContext: context, viewport }).promise;
+      }
+    }
+
+    // Tải danh sách cuộc họp
     fetch('meetings.json')
-      .then(response => response.json())
+      .then(res => res.json())
       .then(data => {
-        const list = document.getElementById('meetingList');
         data.meetings.forEach(meeting => {
           const div = document.createElement('div');
           div.className = 'meeting-item';
           div.textContent = meeting.title;
-          div.onclick = () => {
-            const viewer = document.getElementById('pdfViewer');
-            viewer.src = meeting.pdf;
-            viewer.style.display = 'block';
-          };
-          list.appendChild(div);
+          div.onclick = () => showPDF(meeting.pdf);
+          meetingList.appendChild(div);
         });
       })
-      .catch(err => console.error('Lỗi tải danh sách:', err));
+      .catch(err => {
+        meetingList.innerHTML = '<p>Lỗi tải danh sách!</p>';
+        console.error(err);
+      });
+
+    // Nút quay lại
+    backBtn.onclick = () => {
+      meetingList.style.display = 'flex';
+      pdfContainer.style.display = 'none';
+      backBtn.style.display = 'none';
+      pdfContainer.innerHTML = '';
+    };
   </script>
 </body>
 </html>
