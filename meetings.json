@@ -1,6 +1,6 @@
-[
-  {
-    "title": "Họp giao ban đầu tuần",
-    "date": "2025-11-03",
-  }
-]
+{
+  "meetings": [
+    { "title": "Cuộc họp tháng 10/2025", "pdf": "pdfs/hopthang10.pdf" },
+    { "title": "Kế hoạch họp tháng 11/2025", "pdf": "pdfs/kehoachthang11.pdf" }
+  ]
+}
